@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use super::float3::Float3;
 use super::ray::Ray;
-use super::render::{Lambertian, Material, ScatterInfo};
+use super::render::{Lambertian, Material, Metal};
 
 #[derive(Debug)]
 pub struct HitInfo {
@@ -115,16 +115,17 @@ impl SimpleScene {
             0.5,
             Box::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
         )));
-        world.push(Box::new(Sphere::new(
-            Float3::new(0.0, -100.5, 1.0),
-            100.0,
-            Box::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
-        )));
 
         world.push(Box::new(Sphere::new(
             Float3::new(0.75, 0.0, 1.0),
             0.5,
-            Box::new(Lambertian::new(Float3::new(0.3, 0.8, 0.0))),
+            Box::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.1)),
+        )));
+
+        world.push(Box::new(Sphere::new(
+            Float3::new(0.0, -100.5, 1.0),
+            100.0,
+            Box::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
         )));
         Self { world }
     }

@@ -18,9 +18,21 @@ pub struct Lambertian {
     albedo: Float3,
 }
 
+#[derive(Debug, Clone)]
+pub struct Metal {
+    albedo: Float3,
+    fuzz: f64,
+}
+
 impl Lambertian {
     pub fn new(albedo: Float3) -> Self {
         Self { albedo }
+    }
+}
+
+impl Metal {
+    pub fn new(albedo: Float3, fuzz: f64) -> Self {
+        Self { albedo, fuzz }
     }
 }
 
@@ -36,6 +48,22 @@ impl Material for Lambertian {
             Ray::new(hit.p, target - hit.p),
             self.albedo,
         ))
+    }
+
+    fn box_clone(&self) -> Box<dyn Material> {
+        Box::new(self.clone())
+    }
+}
+
+impl Material for Metal {
+    fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
+        let mut reflected = ray.direction.normalize().reflect(hit.n);
+        reflected = reflected + Float3::random_in_unit_sphere() * self.fuzz;
+        if reflected.dot(hit.n) > 0.0 {
+            Some(ScatterInfo::new(Ray::new(hit.p, reflected), self.albedo))
+        } else {
+            None
+        }
     }
 
     fn box_clone(&self) -> Box<dyn Material> {

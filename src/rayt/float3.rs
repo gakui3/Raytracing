@@ -150,6 +150,10 @@ impl Float3 {
         let recip = factor.recip();
         Self::from_iter(self.0.iter().map(|x| x.powf(recip)))
     }
+
+    pub fn reflect(&self, normal: Self) -> Float3 {
+        *self - normal * 2.0 * self.dot(normal)
+    }
 }
 
 impl FromIterator<f64> for Float3 {
