@@ -137,13 +137,18 @@ impl Float3 {
         origin + direction * 2.0
     }
 
-    pub fn random_in_unit_sphere() -> Self {
+    pub fn random_in_unit_sphere() -> Float3 {
         loop {
             let point = Self::random_limit(-1.0, 1.0);
             if point.length_squared() < 1.0 {
                 return point;
             }
         }
+    }
+
+    pub fn gamma(&self, factor: f64) -> Float3 {
+        let recip = factor.recip();
+        Self::from_iter(self.0.iter().map(|x| x.powf(recip)))
     }
 }
 
@@ -195,6 +200,18 @@ impl Mul<f64> for Float3 {
 
     fn mul(self, rhs: f64) -> Self::Output {
         Float3([self.0[0] * rhs, self.0[1] * rhs, self.0[2] * rhs])
+    }
+}
+
+impl Mul for Float3 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Float3([
+            self.0[0] * rhs.0[0],
+            self.0[1] * rhs.0[1],
+            self.0[2] * rhs.0[2],
+        ])
     }
 }
 

@@ -2,17 +2,19 @@ use std::fmt::Debug;
 
 use super::float3::Float3;
 use super::ray::Ray;
+use super::render::{Lambertian, Material, ScatterInfo};
 
 #[derive(Debug)]
 pub struct HitInfo {
     pub t: f64,
     pub p: Float3,
     pub n: Float3,
+    pub m: Box<dyn Material>,
 }
 
 impl HitInfo {
-    const fn new(t: f64, p: Float3, n: Float3) -> Self {
-        Self { t, p, n }
+    fn new(t: f64, p: Float3, n: Float3, m: Box<dyn Material>) -> Self {
+        Self { t, p, n, m }
     }
 }
 
@@ -24,11 +26,16 @@ pub trait Shape: Debug {
 pub struct Sphere {
     center: Float3,
     radius: f64,
+    material: Box<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Float3, radius: f64) -> Sphere {
-        Self { center, radius }
+    pub fn new(center: Float3, radius: f64, material: Box<dyn Material>) -> Sphere {
+        Self {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -39,16 +46,30 @@ impl Shape for Sphere {
         let b = 2.0 * ray.direction.dot(oc);
         let c = oc.dot(oc) - self.radius.powi(2);
         let d = b * b - 4.0 * a * c;
-        if d < 0.0 {
-            return None;
+        if d > 0.0 {
+            let root = d.sqrt();
+            let temp = (-b - root) / (2.0 * a);
+            if t_min < temp && temp < t_max {
+                let p = ray.at(temp);
+                return Some(HitInfo::new(
+                    temp,
+                    p,
+                    (p - self.center) / self.radius,
+                    self.material.box_clone(),
+                ));
+            }
+            let temp = (-b + root) / (2.0 * a);
+            if t_min < temp && temp < t_max {
+                let p = ray.at(temp);
+                return Some(HitInfo::new(
+                    temp,
+                    p,
+                    (p - self.center) / self.radius,
+                    self.material.box_clone(),
+                ));
+            }
         }
-        let t = (-b - d.sqrt()) / (2.0 * a);
-        if t < t_min || t_max < t {
-            return None;
-        }
-        let p = ray.at(t);
-        let n = (p - self.center) / self.radius;
-        Some(HitInfo::new(t, p, n))
+        None
     }
 }
 
@@ -89,17 +110,42 @@ pub struct SimpleScene {
 impl SimpleScene {
     pub fn new() -> Self {
         let mut world = ShapeList::new();
-        world.push(Box::new(Sphere::new(Float3::new(0.0, 0.0, 1.0), 0.5)));
-        world.push(Box::new(Sphere::new(Float3::new(0.0, -100.5, 1.0), 100.0)));
+        world.push(Box::new(Sphere::new(
+            Float3::new(-0.75, 0.0, 1.0),
+            0.5,
+            Box::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
+        )));
+        world.push(Box::new(Sphere::new(
+            Float3::new(0.0, -100.5, 1.0),
+            100.0,
+            Box::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
+        )));
+
+        world.push(Box::new(Sphere::new(
+            Float3::new(0.75, 0.0, 1.0),
+            0.5,
+            Box::new(Lambertian::new(Float3::new(0.3, 0.8, 0.0))),
+        )));
         Self { world }
     }
 
     pub fn trace(&self, ray: Ray) -> Float3 {
-        let hit_info = self.world.hit(&ray, 0.0, f64::MAX);
+        // let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
+        // if let Some(hit) = hit_info {
+        //     let target = hit.p + hit.n + Float3::random_in_unit_sphere();
+        //     self.trace(Ray::new(hit.p, target - hit.p)) * 0.5
+        //     // (hit.n + Float3::one()) * 0.5
+        // } else {
+        //     Float3::new(1.0, 1.0, 1.0)
+        // }
+        let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
         if let Some(hit) = hit_info {
-            let target = hit.p + hit.n + Float3::random_in_unit_sphere();
-            self.trace(Ray::new(hit.p, target - hit.p)) * 0.5
-            // (hit.n + Float3::one()) * 0.5
+            let scatter_info = hit.m.scatter(&ray, &hit);
+            if let Some(scatter) = scatter_info {
+                return self.trace(scatter.ray) * scatter.albedo;
+            } else {
+                return Float3::new(1.0, 1.0, 1.0);
+            }
         } else {
             Float3::new(1.0, 1.0, 1.0)
         }

@@ -25,16 +25,16 @@ impl Ray {
     //     d > 0.0
     // }
 
-    pub fn hit_sphere(&self, center: Point3, radius: f64) -> f64 {
-        let oc = self.origin - center;
-        let a = self.direction.dot(self.direction);
-        let b = 2.0 * self.direction.dot(oc);
-        let c = oc.dot(oc) - radius.powi(2);
-        let d = b * b - 4.0 * a * c;
-        if d < 0.0 {
-            -1.0
-        } else {
-            return (-b - d.sqrt()) / (2.0 * a);
-        }
-    }
+    // pub fn hit_sphere(&self, center: Point3, radius: f64) -> f64 {
+    //     let oc = self.origin - center;
+    //     let a = self.direction.dot(self.direction);
+    //     let b = 2.0 * self.direction.dot(oc);
+    //     let c = oc.dot(oc) - radius.powi(2);
+    //     let d = b * b - 4.0 * a * c;
+    //     if d < 0.0 {
+    //         -1.0
+    //     } else {
+    //         return (-b - d.sqrt()) / (2.0 * a);
+    //     }
+    // }
 }
