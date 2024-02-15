@@ -130,7 +130,7 @@ impl SimpleScene {
         Self { world }
     }
 
-    pub fn trace(&self, ray: Ray) -> Float3 {
+    pub fn trace(&self, ray: Ray, depth: usize) -> Float3 {
         // let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
         // if let Some(hit) = hit_info {
         //     let target = hit.p + hit.n + Float3::random_in_unit_sphere();
@@ -141,9 +141,13 @@ impl SimpleScene {
         // }
         let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
         if let Some(hit) = hit_info {
-            let scatter_info = hit.m.scatter(&ray, &hit);
+            let scatter_info = if depth > 0 {
+                hit.m.scatter(&ray, &hit)
+            } else {
+                None
+            };
             if let Some(scatter) = scatter_info {
-                return self.trace(scatter.ray) * scatter.albedo;
+                return self.trace(scatter.ray, depth - 1) * scatter.albedo;
             } else {
                 return Float3::new(1.0, 1.0, 1.0);
             }
