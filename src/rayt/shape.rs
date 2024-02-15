@@ -4,6 +4,8 @@ use super::float3::Float3;
 use super::ray::Ray;
 use super::render::{Lambertian, Material, Metal};
 
+use rand::prelude::*;
+
 #[derive(Debug)]
 pub struct HitInfo {
     pub t: f64,
@@ -122,11 +124,28 @@ impl SimpleScene {
             Box::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.1)),
         )));
 
+        for _ in 0..20 {
+            world.push(Box::new(Sphere::new(
+                Float3::new(
+                    random::<f64>() * 20.0 - 10.0,
+                    -0.25,
+                    random::<f64>() * 5.0 + 1.0,
+                ), // 第一引数のFloat3は完全にランダム
+                0.25,
+                Box::new(Lambertian::new(Float3::new(
+                    random::<f64>(),
+                    random::<f64>(),
+                    random::<f64>(),
+                ))),
+            )));
+        }
+
         world.push(Box::new(Sphere::new(
-            Float3::new(0.0, -100.5, 1.0),
-            100.0,
+            Float3::new(0.0, -1000.5, 0.0),
+            1000.0,
             Box::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
         )));
+
         Self { world }
     }
 

@@ -94,7 +94,7 @@ fn main() {
                         1.0 - (i / window_size.width as usize) as f64 / window_size.height as f64;
 
                     let ray = camera.ray(u, v);
-                    let c = scene.trace(ray, 50).gamma(2.2);
+                    let c = scene.trace(ray, 25).gamma(2.2);
                     // let c = scene.trace(ray);
 
                     // println!("{:?}", c);
