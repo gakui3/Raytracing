@@ -1,6 +1,7 @@
 use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::Div;
+use std::ops::DivAssign;
 use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Sub;
@@ -230,6 +231,14 @@ impl AddAssign<Float3> for Float3 {
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..3 {
             self.0[i] += rhs.0[i]
+        }
+    }
+}
+
+impl DivAssign<f64> for Float3 {
+    fn div_assign(&mut self, rhs: f64) {
+        for i in 0..3 {
+            self.0[i] /= rhs;
         }
     }
 }

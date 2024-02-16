@@ -121,17 +121,17 @@ impl SimpleScene {
         world.push(Box::new(Sphere::new(
             Float3::new(0.75, 0.0, 1.0),
             0.5,
-            Box::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.1)),
+            Box::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
         )));
 
-        for _ in 0..20 {
+        for _ in 0..10 {
             world.push(Box::new(Sphere::new(
                 Float3::new(
-                    random::<f64>() * 20.0 - 10.0,
-                    -0.25,
+                    random::<f64>() * 10.0 - 5.0,
+                    0.0,
                     random::<f64>() * 5.0 + 1.0,
                 ), // 第一引数のFloat3は完全にランダム
-                0.25,
+                0.5,
                 Box::new(Lambertian::new(Float3::new(
                     random::<f64>(),
                     random::<f64>(),
@@ -150,14 +150,6 @@ impl SimpleScene {
     }
 
     pub fn trace(&self, ray: Ray, depth: usize) -> Float3 {
-        // let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
-        // if let Some(hit) = hit_info {
-        //     let target = hit.p + hit.n + Float3::random_in_unit_sphere();
-        //     self.trace(Ray::new(hit.p, target - hit.p)) * 0.5
-        //     // (hit.n + Float3::one()) * 0.5
-        // } else {
-        //     Float3::new(1.0, 1.0, 1.0)
-        // }
         let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
         if let Some(hit) = hit_info {
             let scatter_info = if depth > 0 {

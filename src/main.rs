@@ -11,6 +11,8 @@ use shape::{HitInfo, SimpleScene, Sphere};
 use env_logger;
 use log::{error, info, warn};
 
+use rayon::prelude::*;
+
 use winit::{
     //Event と WindowEvent という二つの型（または列挙型）が winit::event モジュールからインポート
     event::{Event, WindowEvent},
@@ -26,6 +28,9 @@ use winit::{
 // rustではライブラリをクレートと呼び、クレートの中の関数や構造体をモジュールと呼ぶ
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
+
+pub const sample: usize = 5;
+pub const depth: usize = 25;
 
 fn main() {
     env_logger::init();
@@ -94,14 +99,20 @@ fn main() {
                         1.0 - (i / window_size.width as usize) as f64 / window_size.height as f64;
 
                     let ray = camera.ray(u, v);
-                    let c = scene.trace(ray, 25).gamma(2.2);
+                    let mut color = (0..sample)
+                        .into_iter()
+                        .fold(Float3::new(0.0, 0.0, 0.0), |acc, _| {
+                            acc + scene.trace(ray, depth)
+                        });
+                    color /= sample as f64;
+                    // let c = scene.trace(ray, 25).gamma(2.2);
                     // let c = scene.trace(ray);
 
                     // println!("{:?}", c);
 
-                    pixel[0] = (c.x() * 255.0) as u8;
-                    pixel[1] = (c.y() * 255.0) as u8;
-                    pixel[2] = (c.z() * 255.0) as u8;
+                    pixel[0] = (color.x() * 255.0) as u8;
+                    pixel[1] = (color.y() * 255.0) as u8;
+                    pixel[2] = (color.z() * 255.0) as u8;
                     pixel[3] = 255;
                 }
                 //}
