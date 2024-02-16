@@ -87,34 +87,36 @@ fn main() {
                 *control_flow = ControlFlow::Exit;
             }
             Event::RedrawRequested(_) => {
-                //もしpixels.get_frameの戻り値がSome(frame)の場合、
-                //括弧内の処理を実行する
-                //Some(frame)は、frameがSome型であることを示している
-                //Some型は、値があることを示すenum。SomeとNoneの2つのバリアントを持つ
-                //つまり、ここでは、frameがSome型である場合のみ、処理を実行する
                 let frame = pixels.get_frame();
-                for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-                    let u = (i % window_size.width as usize) as f64 / window_size.width as f64;
-                    let v =
-                        1.0 - (i / window_size.width as usize) as f64 / window_size.height as f64;
 
-                    let ray = camera.ray(u, v);
-                    let mut color = (0..sample)
-                        .into_iter()
-                        .fold(Float3::new(0.0, 0.0, 0.0), |acc, _| {
-                            acc + scene.trace(ray, depth)
-                        });
-                    color /= sample as f64;
-                    // let c = scene.trace(ray, 25).gamma(2.2);
-                    // let c = scene.trace(ray);
+                frame
+                    .chunks_exact_mut(4)
+                    .enumerate()
+                    .par_bridge()
+                    .for_each(|(i, pixel)| {
+                        let u = (i % window_size.width as usize) as f64 / window_size.width as f64;
+                        let v = 1.0
+                            - (i / window_size.width as usize) as f64 / window_size.height as f64;
 
-                    // println!("{:?}", c);
+                        let ray = camera.ray(u, v);
+                        let mut color = (0..sample)
+                            .into_par_iter() // 並列イテレータ
+                            .fold(
+                                || Float3::new(0.0, 0.0, 0.0),
+                                |acc, _| acc + scene.trace(ray, depth),
+                            )
+                            .reduce(|| Float3::new(0.0, 0.0, 0.0), |acc, val| acc + val);
+                        color /= sample as f64;
+                        // let c = scene.trace(ray, 25).gamma(2.2);
+                        // let c = scene.trace(ray);
 
-                    pixel[0] = (color.x() * 255.0) as u8;
-                    pixel[1] = (color.y() * 255.0) as u8;
-                    pixel[2] = (color.z() * 255.0) as u8;
-                    pixel[3] = 255;
-                }
+                        // println!("{:?}", c);
+
+                        pixel[0] = (color.x() * 255.0) as u8;
+                        pixel[1] = (color.y() * 255.0) as u8;
+                        pixel[2] = (color.z() * 255.0) as u8;
+                        pixel[3] = 255;
+                    });
                 //}
 
                 pixels.render().unwrap();

@@ -36,9 +36,8 @@ impl Metal {
     }
 }
 
-pub trait Material: std::fmt::Debug {
+pub trait Material: std::fmt::Debug + Sync + Send {
     fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo>;
-    fn box_clone(&self) -> Box<dyn Material>;
 }
 
 impl Material for Lambertian {
@@ -48,10 +47,6 @@ impl Material for Lambertian {
             Ray::new(hit.p, target - hit.p),
             self.albedo,
         ))
-    }
-
-    fn box_clone(&self) -> Box<dyn Material> {
-        Box::new(self.clone())
     }
 }
 
@@ -64,9 +59,5 @@ impl Material for Metal {
         } else {
             None
         }
-    }
-
-    fn box_clone(&self) -> Box<dyn Material> {
-        Box::new(self.clone())
     }
 }

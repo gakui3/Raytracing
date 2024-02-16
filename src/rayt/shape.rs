@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::sync::Arc;
 
 use super::float3::Float3;
 use super::ray::Ray;
@@ -11,16 +12,16 @@ pub struct HitInfo {
     pub t: f64,
     pub p: Float3,
     pub n: Float3,
-    pub m: Box<dyn Material>,
+    pub m: Arc<dyn Material>,
 }
 
 impl HitInfo {
-    fn new(t: f64, p: Float3, n: Float3, m: Box<dyn Material>) -> Self {
+    fn new(t: f64, p: Float3, n: Float3, m: Arc<dyn Material>) -> Self {
         Self { t, p, n, m }
     }
 }
 
-pub trait Shape: Debug {
+pub trait Shape: Sync + Debug {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitInfo>;
 }
 
@@ -28,11 +29,11 @@ pub trait Shape: Debug {
 pub struct Sphere {
     center: Float3,
     radius: f64,
-    material: Box<dyn Material>,
+    material: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Float3, radius: f64, material: Box<dyn Material>) -> Sphere {
+    pub fn new(center: Float3, radius: f64, material: Arc<dyn Material>) -> Sphere {
         Self {
             center,
             radius,
@@ -57,7 +58,7 @@ impl Shape for Sphere {
                     temp,
                     p,
                     (p - self.center) / self.radius,
-                    self.material.box_clone(),
+                    Arc::clone(&self.material),
                 ));
             }
             let temp = (-b + root) / (2.0 * a);
@@ -67,7 +68,7 @@ impl Shape for Sphere {
                     temp,
                     p,
                     (p - self.center) / self.radius,
-                    self.material.box_clone(),
+                    Arc::clone(&self.material),
                 ));
             }
         }
@@ -115,13 +116,13 @@ impl SimpleScene {
         world.push(Box::new(Sphere::new(
             Float3::new(-0.75, 0.0, 1.0),
             0.5,
-            Box::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
+            Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
         )));
 
         world.push(Box::new(Sphere::new(
             Float3::new(0.75, 0.0, 1.0),
             0.5,
-            Box::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
+            Arc::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
         )));
 
         for _ in 0..10 {
@@ -132,7 +133,7 @@ impl SimpleScene {
                     random::<f64>() * 5.0 + 1.0,
                 ), // 第一引数のFloat3は完全にランダム
                 0.5,
-                Box::new(Lambertian::new(Float3::new(
+                Arc::new(Lambertian::new(Float3::new(
                     random::<f64>(),
                     random::<f64>(),
                     random::<f64>(),
@@ -143,7 +144,7 @@ impl SimpleScene {
         world.push(Box::new(Sphere::new(
             Float3::new(0.0, -1000.5, 0.0),
             1000.0,
-            Box::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
+            Arc::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
         )));
 
         Self { world }
