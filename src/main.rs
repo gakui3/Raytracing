@@ -39,8 +39,8 @@ fn main() {
     let event_loop = EventLoop::new();
     // let screenWidth = 1280;
     // let screenHeight = 720;
-    let screenWidth = 640;
-    let screenHeight = 360;
+    let screenWidth = 426;
+    let screenHeight = 240;
 
     let camera = Camera::from_lookat(
         Float3::new(0.0, 0.0, 0.0),
