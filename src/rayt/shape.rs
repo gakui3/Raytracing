@@ -122,24 +122,25 @@ impl SimpleScene {
         world.push(Box::new(Sphere::new(
             Float3::new(0.75, 0.0, 1.0),
             0.5,
-            Arc::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
+            // Arc::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
+            Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
         )));
 
-        for _ in 0..10 {
-            world.push(Box::new(Sphere::new(
-                Float3::new(
-                    random::<f64>() * 10.0 - 5.0,
-                    0.0,
-                    random::<f64>() * 5.0 + 1.0,
-                ), // 第一引数のFloat3は完全にランダム
-                0.5,
-                Arc::new(Lambertian::new(Float3::new(
-                    random::<f64>(),
-                    random::<f64>(),
-                    random::<f64>(),
-                ))),
-            )));
-        }
+        // for _ in 0..5 {
+        //     world.push(Box::new(Sphere::new(
+        //         Float3::new(
+        //             random::<f64>() * 10.0 - 5.0,
+        //             0.0,
+        //             random::<f64>() * 5.0 + 1.0,
+        //         ), // 第一引数のFloat3は完全にランダム
+        //         0.5,
+        //         Arc::new(Lambertian::new(Float3::new(
+        //             random::<f64>(),
+        //             random::<f64>(),
+        //             random::<f64>(),
+        //         ))),
+        //     )));
+        // }
 
         world.push(Box::new(Sphere::new(
             Float3::new(0.0, -1000.5, 0.0),

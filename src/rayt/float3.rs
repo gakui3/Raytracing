@@ -6,7 +6,10 @@ use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Sub;
 
+use rand::Rng;
+
 use rand::prelude::*;
+use std::f64::consts::PI;
 /// Debug,Copy,Clone,PartialEqという機能を持ったpublicなFloat3という構造体を定義している
 /// Debug:構造体のインスタンスをデバッガで見やすい形式で出力できるようにする。例えば、println!("{:?}", instance); としてインスタンスの内容を確認できる
 /// Copy:このトレイトが実装されていると、構造体のインスタンスは「値によるコピー」（ビット単位のコピー）が可能になる。つまり、インスタンスを別の変数に代入すると、そのデータのコピーが作成される
@@ -145,6 +148,15 @@ impl Float3 {
                 return point;
             }
         }
+    }
+
+    pub fn randpm_unit_vector() -> Float3 {
+        let mut rng = rand::thread_rng();
+        let a: f64 = rng.gen_range(0.0..2.0 * PI); //Rng::gen(0.0, 2.0 * PI);
+        let z: f64 = rng.gen_range(-1.0..1.0);
+        let num: f64 = 1.0 - z * z;
+        let r: f64 = num.sqrt();
+        return Float3::new(r * a.cos(), r * a.sin(), z);
     }
 
     pub fn gamma(&self, factor: f64) -> Float3 {

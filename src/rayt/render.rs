@@ -42,7 +42,7 @@ pub trait Material: std::fmt::Debug + Sync + Send {
 
 impl Material for Lambertian {
     fn scatter(&self, _ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
-        let target = hit.p + hit.n + Float3::random_in_unit_sphere();
+        let target = hit.p + hit.n + Float3::randpm_unit_vector();
         Some(ScatterInfo::new(
             Ray::new(hit.p, target - hit.p),
             self.albedo,
@@ -53,7 +53,7 @@ impl Material for Lambertian {
 impl Material for Metal {
     fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
         let mut reflected = ray.direction.normalize().reflect(hit.n);
-        reflected = reflected + Float3::random_in_unit_sphere() * self.fuzz;
+        reflected = reflected + Float3::randpm_unit_vector() * self.fuzz;
         if reflected.dot(hit.n) > 0.0 {
             Some(ScatterInfo::new(Ray::new(hit.p, reflected), self.albedo))
         } else {
