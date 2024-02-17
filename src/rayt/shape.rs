@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use super::float3::Float3;
 use super::ray::Ray;
-use super::render::{Lambertian, Material, Metal};
+use super::render::{DiffuseLight, Lambertian, Material, Metal};
 
 use rand::prelude::*;
 
@@ -123,7 +123,8 @@ impl SimpleScene {
             Float3::new(0.75, 0.0, 1.0),
             0.5,
             // Arc::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
-            Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
+            // Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
+            Arc::new(DiffuseLight::new(Float3::new(10.0, 10.0, 10.0))),
         )));
 
         // for _ in 0..5 {
@@ -154,18 +155,19 @@ impl SimpleScene {
     pub fn trace(&self, ray: Ray, depth: usize) -> Float3 {
         let hit_info = self.world.hit(&ray, 0.001, f64::MAX);
         if let Some(hit) = hit_info {
+            let emitted = hit.m.emitted(&ray, &hit);
             let scatter_info = if depth > 0 {
                 hit.m.scatter(&ray, &hit)
             } else {
                 None
             };
             if let Some(scatter) = scatter_info {
-                return self.trace(scatter.ray, depth - 1) * scatter.albedo;
+                return self.trace(scatter.ray, depth - 1) * scatter.albedo + emitted;
             } else {
-                return Float3::new(1.0, 1.0, 1.0);
+                return emitted;
             }
         } else {
-            Float3::new(1.0, 1.0, 1.0)
+            Float3::new(0.0, 0.0, 0.0)
         }
     }
 }

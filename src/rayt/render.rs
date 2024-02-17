@@ -38,10 +38,13 @@ impl Metal {
 
 pub trait Material: std::fmt::Debug + Sync + Send {
     fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo>;
+    fn emitted(&self, _ray: &Ray, _hit: &HitInfo) -> Float3 {
+        Float3::zero()
+    }
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
+    fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
         let target = hit.p + hit.n + Float3::randpm_unit_vector();
         Some(ScatterInfo::new(
             Ray::new(hit.p, target - hit.p),
@@ -59,5 +62,23 @@ impl Material for Metal {
         } else {
             None
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct DiffuseLight {
+    emit: Float3,
+}
+impl DiffuseLight {
+    pub fn new(emit: Float3) -> Self {
+        Self { emit }
+    }
+}
+impl Material for DiffuseLight {
+    fn scatter(&self, ray: &Ray, hit: &HitInfo) -> Option<ScatterInfo> {
+        None
+    }
+    fn emitted(&self, ray: &Ray, hit: &HitInfo) -> Float3 {
+        self.emit
     }
 }
