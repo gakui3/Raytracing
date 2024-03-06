@@ -77,6 +77,55 @@ impl Shape for Sphere {
 }
 
 #[derive(Debug)]
+enum RectAxisType {
+    XY,
+    XZ,
+    YZ,
+}
+
+#[derive(Debug)]
+pub struct Rect {
+    x0: f64,
+    x1: f64,
+    y0: f64,
+    y1: f64,
+    k: f64,
+    axis: RectAxisType,
+    material: Arc<dyn Material>,
+}
+
+impl Shape for Rect {
+    fn hit(&self, ray: &Ray, t0: f64, t1: f64) -> Option<HitInfo> {
+        let mut origin = ray.origin;
+        let mut direction = ray.direction;
+        let mut axis = Float3::zaxis();
+        match self.axis {
+            RectAxisType::XY => {}
+            RectAxisType::XZ => {
+                origin = Float3::new(origin.x(), origin.z(), origin.y());
+                direction = Float3::new(direction.x(), direction.z(), direction.y());
+                axis = Float3::yaxis();
+            }
+            RectAxisType::YZ => {
+                origin = Float3::new(origin.y(), origin.z(), origin.x());
+                direction = Float3::new(direction.y(), direction.z(), direction.x());
+                axis = Float3::xaxis();
+            }
+        }
+        let t = (self.k - origin.z()) / direction.z();
+        if t < t0 || t > t1 {
+            return None;
+        }
+        let x = origin.x() + t * direction.x();
+        let y = origin.y() + t * direction.y();
+        if x < self.x0 || x > self.x1 || y < self.y0 || y > self.y1 {
+            return None;
+        }
+        Some(HitInfo::new(t, ray.at(t), axis, Arc::clone(&self.material)))
+    }
+}
+
+#[derive(Debug)]
 pub struct ShapeList {
     objects: Vec<Box<dyn Shape>>,
 }
@@ -149,6 +198,16 @@ impl SimpleScene {
             Arc::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
         )));
 
+        world.push(Box::new(Rect {
+            x0: -1.0,
+            x1: 1.0,
+            y0: -1.0,
+            y1: 1.0,
+            k: 1.0,
+            axis: RectAxisType::XY,
+            material: Arc::new(DiffuseLight::new(Float3::new(10.0, 10.0, 10.0))),
+        }));
+
         Self { world }
     }
 
@@ -167,7 +226,7 @@ impl SimpleScene {
                 return emitted;
             }
         } else {
-            Float3::new(0.0, 0.0, 0.0)
+            Float3::new(0.1, 0.1, 0.1)
         }
     }
 }
