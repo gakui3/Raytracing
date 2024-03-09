@@ -91,6 +91,7 @@ pub struct Rect {
     y1: f64,
     k: f64,
     axis: RectAxisType,
+    n: Float3,
     material: Arc<dyn Material>,
 }
 
@@ -121,7 +122,12 @@ impl Shape for Rect {
         if x < self.x0 || x > self.x1 || y < self.y0 || y > self.y1 {
             return None;
         }
-        Some(HitInfo::new(t, ray.at(t), axis, Arc::clone(&self.material)))
+        Some(HitInfo::new(
+            t,
+            ray.at(t),
+            self.n,
+            Arc::clone(&self.material),
+        ))
     }
 }
 
@@ -162,15 +168,15 @@ pub struct SimpleScene {
 impl SimpleScene {
     pub fn new() -> Self {
         let mut world = ShapeList::new();
-        world.push(Box::new(Sphere::new(
-            Float3::new(-0.75, 0.0, 1.0),
-            0.5,
-            Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
-        )));
+        // world.push(Box::new(Sphere::new(
+        //     Float3::new(0.0, 0.0, 1.0),
+        //     0.5,
+        //     Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
+        // )));
 
         world.push(Box::new(Sphere::new(
-            Float3::new(0.75, 0.0, 1.0),
-            0.5,
+            Float3::new(0.0, 0.0, 1.0),
+            0.25,
             // Arc::new(Metal::new(Float3::new(0.3, 0.8, 0.0), 0.0)),
             // Arc::new(Lambertian::new(Float3::new(0.8, 0.3, 0.3))),
             Arc::new(DiffuseLight::new(Float3::new(10.0, 10.0, 10.0))),
@@ -192,20 +198,89 @@ impl SimpleScene {
         //     )));
         // }
 
-        world.push(Box::new(Sphere::new(
-            Float3::new(0.0, -1000.5, 0.0),
-            1000.0,
-            Arc::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
-        )));
+        // world.push(Box::new(Sphere::new(
+        //     Float3::new(0.0, -1000.5, 0.0),
+        //     1000.0,
+        //     Arc::new(Lambertian::new(Float3::new(0.3, 0.3, 0.3))),
+        // )));
 
+        //コーネルボックスを作成
+        //右の壁
         world.push(Box::new(Rect {
-            x0: -1.0,
-            x1: 1.0,
-            y0: -1.0,
-            y1: 1.0,
-            k: 1.0,
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
+            axis: RectAxisType::YZ,
+            n: Float3::new(-1.0, 0.0, 0.0),
+            material: Arc::new(Lambertian::new(Float3::new(0.65, 0.05, 0.05))),
+        }));
+        // //左の壁
+        world.push(Box::new(Rect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 0.0,
+            axis: RectAxisType::YZ,
+            n: Float3::new(1.0, 0.0, 0.0),
+            material: Arc::new(Lambertian::new(Float3::new(0.12, 0.45, 0.15))),
+        }));
+        // //天井のライト
+        world.push(Box::new(Rect {
+            x0: 213.0,
+            x1: 343.0,
+            y0: 227.0,
+            y1: 332.0,
+            k: 554.0,
+            axis: RectAxisType::XZ,
+            n: Float3::new(0.0, -1.0, 0.0),
+            material: Arc::new(DiffuseLight::new(Float3::new(15.0, 15.0, 15.0))),
+        }));
+        //天井
+        world.push(Box::new(Rect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
+            axis: RectAxisType::XZ,
+            n: Float3::new(0.0, -1.0, 0.0),
+            material: Arc::new(Lambertian::new(Float3::new(0.73, 0.73, 0.73))),
+        }));
+        //奥の壁
+        world.push(Box::new(Rect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
             axis: RectAxisType::XY,
-            material: Arc::new(DiffuseLight::new(Float3::new(10.0, 10.0, 10.0))),
+            n: Float3::new(0.0, 0.0, -1.0),
+            material: Arc::new(Lambertian::new(Float3::new(0.73, 0.73, 0.73))),
+        }));
+        //手前の壁
+        // world.push(Box::new(Rect {
+        //     x0: 0.0,
+        //     x1: 555.0,
+        //     y0: 0.0,
+        //     y1: 555.0,
+        //     k: 0.0,
+        //     axis: RectAxisType::XY,
+        //     material: Arc::new(Lambertian::new(Float3::new(0.73, 0.73, 0.73))),
+        // }));
+
+        //床
+        world.push(Box::new(Rect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 0.0,
+            axis: RectAxisType::XZ,
+            n: Float3::new(0.0, 0.0, 1.0),
+            material: Arc::new(Lambertian::new(Float3::new(0.73, 0.73, 0.73))),
         }));
 
         Self { world }
@@ -227,6 +302,27 @@ impl SimpleScene {
             }
         } else {
             Float3::new(0.1, 0.1, 0.1)
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct FlipFace {
+    shape: Box<dyn Shape>,
+}
+
+impl FlipFace {
+    fn new(shape: Box<dyn Shape>) -> Self {
+        Self { shape }
+    }
+}
+
+impl Shape for FlipFace {
+    fn hit(&self, ray: &Ray, t0: f64, t1: f64) -> Option<HitInfo> {
+        if let Some(hit) = self.shape.hit(ray, t0, t1) {
+            Some(HitInfo { n: -hit.n, ..hit })
+        } else {
+            None
         }
     }
 }

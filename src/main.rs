@@ -29,7 +29,7 @@ use winit::{
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
 
-pub const sample: usize = 5;
+pub const sample: usize = 25;
 pub const depth: usize = 25;
 
 fn main() {
@@ -39,21 +39,33 @@ fn main() {
     let event_loop = EventLoop::new();
     // let screenWidth = 1280;
     // let screenHeight = 720;
-    let screenWidth = 640;
-    let screenHeight = 360;
+
+    // let screenWidth = 640;
+    // let screenHeight = 360;
+
     // let screenWidth = 426;
     // let screenHeight = 240;
 
-    let camera = Camera::from_lookat(
-        Float3::new(0.0, 0.0, 0.0),
-        Float3::new(0.0, 0.0, 1.0),
-        Float3::new(0.0, 1.0, 0.0),
-        90.0,
-        16.0 / 9.0,
-    );
+    let screenWidth = 200;
+    let screenHeight = 200;
 
-    let ray = camera.ray(1.0, 0.0);
-    println!("{:?}", ray.direction.normalize());
+    // let camera = Camera::from_lookat(
+    //     Float3::new(0.5, 0.0, 0.0),
+    //     Float3::new(0.5, 0.0, 1.0),
+    //     Float3::new(0.0, 1.0, 0.0),
+    //     90.0,
+    //     16.0 / 9.0,
+    // );
+    // let ray = camera.ray(0.5, 0.5);
+    // println!("{:?}", ray.direction.normalize());
+
+    let camera = Camera::from_lookat(
+        Float3::new(278.0, 278.0, -800.0),
+        Float3::new(278.0, 278.0, 0.0),
+        Float3::new(0.0, 1.0, 0.0),
+        20.0,
+        1.0,
+    );
 
     //winitクレート(ライブラリ)を使用して、ウィンドウを作成する
     let window = WindowBuilder::new()
