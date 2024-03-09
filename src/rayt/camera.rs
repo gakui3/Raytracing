@@ -22,7 +22,7 @@ impl Camera {
     ) -> Self {
         let halfh = (vfov.to_radians() * 0.5).tan();
         let halfw = aspect * halfh;
-        let w = (lookat - origin).normalize(); //基底ベクトル。ここは本書とは逆で左手座標系を採用しているため、lookat - originとなる
+        let w = (origin - lookat).normalize(); //基底ベクトル。ここは本書とは逆で左手座標系を採用しているため、lookat - originとなる
         let x = vup.cross(w).normalize(); //基底ベクトル
         let y = w.cross(x).normalize(); //基底ベクトル
         let xw = x * halfw * 2.0;
@@ -31,7 +31,7 @@ impl Camera {
             origin,
             u: xw * 2.0,
             v: yh * 2.0,
-            w: origin - xw - yh + w,
+            w: origin - xw - yh - w,
         }
     }
 
