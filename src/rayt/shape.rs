@@ -236,7 +236,7 @@ impl SimpleScene {
             k: 554.0,
             axis: RectAxisType::XZ,
             n: Float3::new(0.0, -1.0, 0.0),
-            material: Arc::new(DiffuseLight::new(Float3::new(15.0, 15.0, 15.0))),
+            material: Arc::new(DiffuseLight::new(Float3::new(40.0, 40.0, 40.0))),
         }));
         //天井
         world.push(Box::new(Rect {

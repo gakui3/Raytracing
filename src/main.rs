@@ -29,8 +29,8 @@ use winit::{
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
 
-pub const sample: usize = 25;
-pub const depth: usize = 25;
+pub const sample: usize = 1000;
+pub const depth: usize = 50;
 
 fn main() {
     env_logger::init();
@@ -41,13 +41,13 @@ fn main() {
     // let screenHeight = 720;
 
     // let screenWidth = 640;
-    // let screenHeight = 360;
+    // let screenHeight = 640;
 
-    // let screenWidth = 426;
-    // let screenHeight = 240;
+    let screenWidth = 400;
+    let screenHeight = 400;
 
-    let screenWidth = 200;
-    let screenHeight = 200;
+    // let screenWidth = 200;
+    // let screenHeight = 200;
 
     // let camera = Camera::from_lookat(
     //     Float3::new(0.5, 0.0, 0.0),
